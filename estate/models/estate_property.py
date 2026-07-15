@@ -1,17 +1,17 @@
 from dateutil.relativedelta import relativedelta
-from odoo import fields, models
+from odoo import api, fields, models
 
 class Property(models.Model):
     _name = 'estate.property'
     _description = 'Real Estate Property'
 
-    def default_date_availability(self):
+    def _default_date_availability(self):
         return fields.Date.today() + relativedelta(months=3)
 
     name = fields.Char('Property Titel', required=True)
     description = fields.Text('Property Description')
     postcode = fields.Char('Postcode')
-    date_availability = fields.Date('Available From', copy=False, default=lambda self: self.default_date_availability())
+    date_availability = fields.Date('Available From', copy=False, default=lambda self: self._default_date_availability())
     expected_price = fields.Float('Expected Price', required=True)
     selling_price = fields.Float('Selling Price', readonly=True, copy=False)
     bedrooms = fields.Integer('Bedrooms', default=2)
@@ -45,4 +45,30 @@ class Property(models.Model):
     buyer_id = fields.Many2one('res.partner', string='Buyer', readonly=True, copy=False)
     tag_ids = fields.Many2many('estate.property.tag', string='Tags')
     offer_ids = fields.One2many('estate.property.offer', 'property_id', string='Offers')
+
+    total_area = fields.Integer(
+        'Total Area (sqm)',
+        compute='_compute_total_area')
+    best_price = fields.Float(
+        'Best Offer',
+        compute='_compute_best_price')
+
+    @api.depends('living_area', 'garden_area')
+    def _compute_total_area(self):
+        for record in self:
+            record.total_area = record.living_area + record.garden_area
+
+    @api.depends('offer_ids.price')
+    def _compute_best_price(self):
+        for record in self:
+            record.best_price = max(record.offer_ids.mapped('price')) if record.offer_ids else 0.0
+
+    @api.onchange('garden')
+    def _onchange_garden(self):
+        if self.garden:
+            self.garden_area = 10
+            self.garden_orientation = 'north'
+        else:
+            self.garden_area = 0
+            self.garden_orientation = ""
 
