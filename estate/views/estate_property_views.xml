@@ -42,6 +42,10 @@
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
             <form string="Property">
+                <header>
+                    <button name="set_status_sold" type="object" string="Sold"/>
+                    <button name="set_status_cancel" type="object" string="Cancel"/>
+                </header>
                 <sheet>
                     <h1>
                         <field name="name"/>
@@ -49,7 +53,7 @@
                     <field name="tag_ids" widget="many2many_tags"/>
                     <group>
                         <group>
-                            <field name="property_type_id"/>
+                            <field name="state"/>
                         </group>
                         <group>
                             <field name="expected_price"/>
@@ -57,7 +61,7 @@
                     </group>
                     <group>
                         <group>
-                            <field name="postcode"/>
+                            <field name="property_type_id"/>
                         </group>
                         <group>
                             <field name="best_price"/>
@@ -65,10 +69,15 @@
                     </group>
                     <group>
                         <group>
-                            <field name="date_availability"/>
+                            <field name="postcode"/>
                         </group>
                         <group>
                             <field name="selling_price"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="date_availability"/>
                         </group>
                     </group>
                     <notebook>
