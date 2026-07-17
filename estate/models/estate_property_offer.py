@@ -7,6 +7,7 @@ from odoo.exceptions import UserError
 class PropertyOffer(models.Model):
     _name = 'estate.property.offer'
     _description = 'Real Estate Property Offer'
+    _order = 'price desc'
     _check_price = models.Constraint(
         'CHECK(price > 0)',
         'The offered price must be a positive number',
@@ -23,6 +24,7 @@ class PropertyOffer(models.Model):
 
     partner_id = fields.Many2one('res.partner', string='Partner', required=True)
     property_id = fields.Many2one('estate.property', string='Property', required=True)
+    property_type_id = fields.Many2one('estate.property.type', related="property_id.property_type_id", string="Property Type", store=True)
 
     date_deadline = fields.Date(
         string='Deadline',
@@ -45,8 +47,9 @@ class PropertyOffer(models.Model):
             if 'accepted' in record:
                 raise UserError('One offer has already been accepted')
             record.state = 'accepted'
-            self.env['estate.property'].search([]).selling_price = record.price
-            self.env['estate.property'].search([]).buyer_id = record.partner_id.id
+            self.env['estate.property'].search([('name','=', record.property_id.name)], limit=1).selling_price = record.price
+            self.env['estate.property'].search([('name','=', record.property_id.name)], limit=1).buyer_id = record.partner_id.id
+            self.env['estate.property'].search([('name','=', record.property_id.name)], limit=1).state = 'offer accepted'
         return True
 
     def action_reject(self):

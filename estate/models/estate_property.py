@@ -7,6 +7,7 @@ from odoo.tools import float_is_zero, float_compare
 class Property(models.Model):
     _name = 'estate.property'
     _description = 'Real Estate Property'
+    _order = 'id desc'
     _check_expedted_price = models.Constraint(
         'CHECK(expected_price > 0)',
         'The expected price must be a positive number',
@@ -73,6 +74,8 @@ class Property(models.Model):
     def _compute_best_price(self):
         for record in self:
             record.best_price = max(record.offer_ids.mapped('price')) if record.offer_ids else 0.0
+            if record.offer_ids and record.state not in ('offer accepted', 'sold'):
+                record.state = 'offer received'
 
     @api.constrains('expected_price', 'selling_price')
     def _validate_selling_price(self):
