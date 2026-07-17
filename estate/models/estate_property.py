@@ -57,6 +57,7 @@ class Property(models.Model):
     buyer_id = fields.Many2one('res.partner', string='Buyer', readonly=True, copy=False)
     tag_ids = fields.Many2many('estate.property.tag', string='Tags')
     offer_ids = fields.One2many('estate.property.offer', 'property_id', string='Offers')
+    user_id = fields.Many2one('res.users', string='Seller', default=lambda self: self.env.user)
 
     total_area = fields.Integer(
         'Total Area (sqm)',
@@ -74,8 +75,6 @@ class Property(models.Model):
     def _compute_best_price(self):
         for record in self:
             record.best_price = max(record.offer_ids.mapped('price')) if record.offer_ids else 0.0
-            if record.offer_ids and record.state not in ('offer accepted', 'sold'):
-                record.state = 'offer received'
 
     @api.constrains('expected_price', 'selling_price')
     def _validate_selling_price(self):
@@ -114,3 +113,9 @@ class Property(models.Model):
             else:
                 record.state = 'cancelled'
         return True
+
+    @api.ondelete(at_uninstall=False)
+    def ondelete(self):
+        for record in self:
+            if not set(record.mapped('state')) <= {'new', 'cancelled'}:
+                raise UserError("Only new and cancelled properties can be deleted")

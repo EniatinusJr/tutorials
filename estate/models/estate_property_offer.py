@@ -2,6 +2,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+from odoo.tools import float_compare
 
 
 class PropertyOffer(models.Model):
@@ -56,3 +57,21 @@ class PropertyOffer(models.Model):
         for record in self:
             record.state = 'refused'
         return True
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            property_id = vals.get("property_id")
+            price = vals.get("price")
+
+            if property_id and price is not None:
+                prop = self.env["estate.property"].browse(property_id)
+                if prop.offer_ids:
+                    max_offer = max(prop.offer_ids.mapped("price"))
+                    if float_compare(price, max_offer, precision_rounding=0.01) <= 0:
+                        raise UserError(
+                            "The offer must be higher than %.2f" % max_offer
+                        )
+
+                prop.state = "offer received"
+        return super().create(vals)
