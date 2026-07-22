@@ -4,6 +4,7 @@
     'author': 'SnapErp AG',
     'depends': [
         'base',
+        'mail',
     ],
     'application': True,
     'data': [

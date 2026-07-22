@@ -7,6 +7,7 @@ from odoo.tools import float_is_zero, float_compare
 class Property(models.Model):
     _name = 'estate.property'
     _description = 'Real Estate Property'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'id desc'
     _check_expedted_price = models.Constraint(
         'CHECK(expected_price > 0)',
@@ -20,22 +21,23 @@ class Property(models.Model):
     def _default_date_availability(self):
         return fields.Date.today() + relativedelta(months=3)
 
-    name = fields.Char('Property Titel', required=True)
-    description = fields.Text('Property Description')
-    postcode = fields.Char('Postcode')
-    date_availability = fields.Date('Available From', copy=False, default=lambda self: self._default_date_availability())
-    expected_price = fields.Float('Expected Price', required=True)
-    selling_price = fields.Float('Selling Price', readonly=True, copy=False)
-    bedrooms = fields.Integer('Bedrooms', default=2)
-    living_area = fields.Integer('Living Area (sqm)')
-    facades = fields.Integer('Facades')
-    garage = fields.Boolean('Garage')
-    garden = fields.Boolean('Garden')
-    garden_area = fields.Integer('Garden Area')
+    name = fields.Char('Property Titel', required=True, tracking=True,)
+    description = fields.Text('Property Description', tracking=True,)
+    postcode = fields.Char('Postcode', tracking=True,)
+    date_availability = fields.Date('Available From', copy=False, default=lambda self: self._default_date_availability(), tracking=True,)
+    expected_price = fields.Float('Expected Price', required=True, tracking=True,)
+    selling_price = fields.Float('Selling Price', readonly=True, copy=False, tracking=True,)
+    bedrooms = fields.Integer('Bedrooms', default=2, tracking=True,)
+    living_area = fields.Integer('Living Area (sqm)', tracking=True,)
+    facades = fields.Integer('Facades', tracking=True,)
+    garage = fields.Boolean('Garage', tracking=True,)
+    garden = fields.Boolean('Garden', tracking=True,)
+    garden_area = fields.Integer('Garden Area', tracking=True,)
     garden_orientation = fields.Selection(
         string='Orientation',
         selection=[('north', 'North'),('south', 'South'),('east', 'East'),('west', 'West')],
-        help="Orientation of the Garden area.")
+        help="Orientation of the Garden area.",
+        tracking=True,)
     active = fields.Boolean('Active', default=True)
     state = fields.Selection(
         string='Status',

@@ -44,14 +44,13 @@ class PropertyOffer(models.Model):
             record.validity = (record.date_deadline - days).days
 
     def action_accept(self):
-        for record in self:
-            if 'accepted' in record:
-                raise UserError('One offer has already been accepted')
-            record.state = 'accepted'
-            self.env['estate.property'].search([('name','=', record.property_id.name)], limit=1).selling_price = record.price
-            self.env['estate.property'].search([('name','=', record.property_id.name)], limit=1).buyer_id = record.partner_id.id
-            self.env['estate.property'].search([('name','=', record.property_id.name)], limit=1).state = 'offer accepted'
-        return True
+        self.ensure_one()
+        if "offer accepted" in self.property_id.mapped('state'):
+            raise UserError('One offer has already been accepted')
+        self.state = 'accepted'
+        self.property_id.selling_price = self.price
+        self.property_id.buyer_id = self.partner_id.id
+        self.property_id.state = 'offer accepted'
 
     def action_reject(self):
         for record in self:
