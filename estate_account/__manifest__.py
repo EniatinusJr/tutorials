@@ -4,7 +4,8 @@
     'author': 'SnapErp AG',
     'depends': [
         'base',
-        'account'
+        'estate',
+        'account',
     ],
     'data': [
         'report/estate_account_report.xml',

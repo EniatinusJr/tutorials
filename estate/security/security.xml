@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="estate_property_rule_company" model="ir.rule">
+        <field name="name">Estate properties: allowed companies</field>
+        <field name="model_id" ref="model_estate_property"/>
+        <field name="domain_force">
+            [('company_id', 'in', company_ids)]
+        </field>
+    </record>
+    <record id="groups_privilege_real_estate" model="res.groups.privilege">
+        <field name="name">Real Estate</field>
+        <field name="category_id" ref="base.module_category_real_estate_brokerage"/>
+        <field name="sequence">7</field>
+    </record>
+
+    <record id="estate_group_user" model="res.groups">
+        <field name="name">Agent</field>
+        <field name="privilege_id" ref="groups_privilege_real_estate"/>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="estate_group_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="privilege_id" ref="groups_privilege_real_estate"/>
+        <field name="implied_ids" eval="[(4, ref('estate_group_user'))]"/>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="estate_property_access_rule" model="ir.rule">
+        <field name="name">Access Property Rule for Agents</field>
+        <field name="model_id" ref="model_estate_property"/>
+        <field name="groups" eval="[Command.link(ref('estate_group_user'))]"/>
+        <field name="domain_force">[
+        '|', ('employee_id', '=', user.id),
+             ('employee_id', '=', False)
+        ]</field>
+    </record>
+
+    <record id="estate_property_rule_manager" model="ir.rule">
+    <field name="name">Managers: all properties</field>
+    <field name="model_id" ref="model_estate_property"/>
+    <field name="groups" eval="[Command.link(ref('estate_group_manager'))]"/>
+    <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+</odoo>

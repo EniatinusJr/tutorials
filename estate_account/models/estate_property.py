@@ -6,11 +6,14 @@ class EstateProperty(models.Model):
     _inherit = "estate.property"
 
     def set_status_sold(self):
+        self.check_access("write")
+        print("Access check passed")
+
         res = super().set_status_sold()
-        journal = self.env["account.journal"].search([("type", "=", "sale")], limit=1)
+        journal = self.env["account.journal"].sudo().search([("type", "=", "sale")], limit=1)
 
         for record in self:
-            self.env["account.move"].create(
+            self.env["account.move"].sudo().create(
                 {
                     "partner_id": record.buyer_id.id,
                     "move_type": "out_invoice",

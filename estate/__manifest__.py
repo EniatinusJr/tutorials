@@ -1,6 +1,7 @@
 {
     'name': 'Estate',
     'version': '0.1',
+    'category': 'Real Estate/Brokerage',
     'author': 'SnapErp AG',
     'depends': [
         'base',
@@ -8,6 +9,7 @@
     ],
     'application': True,
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
 
         'views/estate_property_views.xml',
