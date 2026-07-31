@@ -59,7 +59,13 @@ class PropertyOffer(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        prop = self.env['estate.property']
         for vals in vals_list:
+            if vals.get('property_id'):
+                prop = prop.browse(vals["property_id"])
+                if prop.state == 'sold':
+                    raise UserError("You cannot make an offer on a sold property")
+
             property_id = vals.get("property_id")
             price = vals.get("price")
 
